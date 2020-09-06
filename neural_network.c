@@ -3,11 +3,11 @@
 #include <time.h>
 #include <math.h>
 
-#define WIDTH_0 15
-#define WIDTH_1 100
-#define WIDTH_2 100
-#define lr 0.0001
-#define slope 0.3
+#define WIDTH_0 15 // size of the input vector
+#define WIDTH_1 100 // size of the output of the first layer
+#define WIDTH_2 100 // size of the output of the second layer
+#define lr 0.0001 // learning rate
+#define slope 0.3 // parameter of non-activation layer
 
 typedef struct NeuralNet {
 	double **W1;
