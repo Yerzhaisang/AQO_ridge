@@ -73,13 +73,13 @@ nn_init (NeuralNet *nn){ //initializing weights (standard Xavier http://proceedi
 
 double
 neural_predict (double **W1, double *b1, double **W2, double *b2, double *W3, double b3, double *feature){ //prediction
-    double *out1 = calloc(WIDTH_1, sizeof(*out1)); //output of the first layer
+    double *out1 = calloc(WIDTH_1, sizeof(*out1));
     for (int i = 0; i < WIDTH_1; ++i){
         for (int j = 0; j < WIDTH_0; ++j)
             out1[i] = out1[i]+feature[j]*W1[i][j];
         out1[i]=out1[i]+b1[i];
     }
-    double *out2 = calloc(WIDTH_1, sizeof(*out2));
+    double *out2 = calloc(WIDTH_1, sizeof(*out2)); // vector for the output of Leaky ReLU activation function in the first layer
     for (int i = 0; i < WIDTH_1; ++i){
         if (out1[i]<out1[i]*slope)
             out2[i]=out1[i]*slope;
@@ -92,14 +92,14 @@ neural_predict (double **W1, double *b1, double **W2, double *b2, double *W3, do
             out3[i]=out3[i]+out2[j]*W2[i][j];
         out3[i]=out3[i]+b2[i];
     }
-    double *out4 = calloc(WIDTH_2, sizeof(*out4));
+    double *out4 = calloc(WIDTH_2, sizeof(*out4)); // vector for the output of Leaky ReLU activation function in the second layer
     for (int i = 0; i < WIDTH_2; ++i){
         if (out3[i]<out3[i]*slope)
             out4[i]=out3[i]*slope;
         else
             out4[i]=out3[i];
     }
-    double out5=0;
+    double out5=0; //final result (one number)
     for (int j = 0; j < WIDTH_2; ++j)
         out5=out5+out4[j]*W3[j];
     out5=out5+b3;
@@ -138,10 +138,10 @@ neural_learn (double **W1, double *b1, double **W2, double *b2, double *W3, doub
         double out5=0;
         for (int j = 0; j < WIDTH_2; ++j)
             out5=out5+out4[j]*W3[j];
-        out5=out5+b3;
-        double loss = pow(out5 - target,2);
-        double dp1 = (out5 - target) * 2;
-        double *gradW3=malloc(WIDTH_2 * sizeof(*gradW3));
+        out5=out5+b3; // output of forward pass
+        double loss = pow(out5 - target,2); 
+        double dp1 = (out5 - target) * 2; // derivative of the loss w.r.t. the output of forward pass
+        double *gradW3=malloc(WIDTH_2 * sizeof(*gradW3)); // vector for the gradient of the loss w.r.t. weight vector in the third layer
         for (int i = 0; i < WIDTH_2; ++i)
             gradW3[i] = dp1 * out4[i];
         double *dp2=malloc(WIDTH_2 * sizeof(*dp2));
@@ -150,7 +150,7 @@ neural_learn (double **W1, double *b1, double **W2, double *b2, double *W3, doub
         for (int i = 0; i < WIDTH_2; ++i)
             if (out3[i]<slope*out3[i])
                 dp2[i] = dp2[i]*slope;
-        double	*gradW2[WIDTH_2];
+        double	*gradW2[WIDTH_2]; // matrix for the gradient of the loss w.r.t. weight matrix in the second layer
         for (int i = 0; i < WIDTH_2; ++i)
             gradW2[i] = malloc(sizeof(**gradW2) * WIDTH_1);
         for (int i = 0; i < WIDTH_2; ++i)
@@ -163,7 +163,7 @@ neural_learn (double **W1, double *b1, double **W2, double *b2, double *W3, doub
         for (int i = 0; i < WIDTH_1; ++i)
             if (out1[i]<slope*out1[i])
                 dp3[i] = dp3[i]*slope;
-        double	*gradW1[WIDTH_1];
+        double	*gradW1[WIDTH_1]; // matrix for the gradient of the loss w.r.t. weight matrix in the first layer
         for (int i = 0; i < WIDTH_1; ++i)
             gradW1[i] = malloc(sizeof(**gradW1) * WIDTH_0);
         for (int i = 0; i < WIDTH_1; ++i)
@@ -171,16 +171,16 @@ neural_learn (double **W1, double *b1, double **W2, double *b2, double *W3, doub
                 gradW1[i][j] = dp3[i] * feature[j];
         for (int i = 0; i < WIDTH_1; ++i){
             for (int j = 0; j < WIDTH_0; ++j)
-                W1[i][j] = W1[i][j] - lr*gradW1[i][j];
+                W1[i][j] = W1[i][j] - lr*gradW1[i][j]; // updating the weights in the first layer
             b1[i] = b1[i] - lr*dp3[i];
         }
         for (int i = 0; i < WIDTH_2; ++i){
             for (int j = 0; j < WIDTH_1; ++j)
-                W2[i][j] = W2[i][j] - lr*gradW2[i][j];
+                W2[i][j] = W2[i][j] - lr*gradW2[i][j]; // updating the weights in the second layer
             b2[i] = b2[i] - lr*dp2[i];
         }
         for (int i = 0; i < WIDTH_2; ++i)
-            W3[i] = W3[i] - lr*gradW3[i];
+            W3[i] = W3[i] - lr*gradW3[i]; // updating the weights in the third layer
         b3 = b3 - lr*dp1;
     }
 }
