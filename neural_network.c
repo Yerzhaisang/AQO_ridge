@@ -18,7 +18,7 @@ typedef struct NeuralNet {
 	double b3;
 };
 
-NeuralNet create_nn() {
+NeuralNet create_nn() { //creating neural network
 	NeuralNet *res;
 
 	MemoryContext	oldCxt;
@@ -42,7 +42,7 @@ NeuralNet create_nn() {
 }
 
 void
-nn_init (NeuralNet *nn){
+nn_init (NeuralNet *nn){ //initializing weights (standard Xavier http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf)
     srand((long)time(NULL));
     double	stdv;
     stdv = 1 / sqrt(WIDTH_0);
@@ -72,8 +72,8 @@ nn_init (NeuralNet *nn){
 }
 
 double
-neural_predict (double **W1, double *b1, double **W2, double *b2, double *W3, double b3, double *feature){
-    double *out1 = calloc(WIDTH_1, sizeof(*out1));
+neural_predict (double **W1, double *b1, double **W2, double *b2, double *W3, double b3, double *feature){ //prediction
+    double *out1 = calloc(WIDTH_1, sizeof(*out1)); //output of the first layer
     for (int i = 0; i < WIDTH_1; ++i){
         for (int j = 0; j < WIDTH_0; ++j)
             out1[i] = out1[i]+feature[j]*W1[i][j];
